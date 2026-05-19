@@ -375,7 +375,6 @@ const wordEl=document.getElementById('intro-word');
 const intro=document.getElementById('intro');
 const steps=[
   {num:'3',word:'',dur:850},{num:'2',word:'',dur:850},{num:'1',word:'',dur:850},
-  {num:'',word:'Happy',dur:900},{num:'',word:'Belated',dur:900},{num:'',word:'Birthday',dur:900},{num:'',word:'Kilul!',dur:1100},
 ];
 let si=0;
 function runStep(){
@@ -2053,7 +2052,7 @@ function showBalloonPop(onDone){
 
   // Spell progress bar — shows _ _ _ _ _ filling in as letters caught
   const spellEl=document.createElement('div');
-  spellEl.style.cssText=`position:absolute;bottom:clamp(60px,13vh,90px);left:50%;transform:translateX(-50%);font-family:'Cormorant Garamond',serif;font-size:clamp(28px,9vw,52px);color:#ff80ab;letter-spacing:clamp(10px,4vw,22px);text-align:center;pointer-events:none;white-space:nowrap;text-shadow:0 0 20px rgba(255,100,160,0.7);`;
+  spellEl.style.cssText=`position:absolute;bottom:clamp(60px,13vh,90px);left:50%;transform:translateX(-50%);font-family:'Cormorant Garamond',serif;font-size:clamp(28px,9vw,52px);color:#ffd700;letter-spacing:clamp(10px,4vw,22px);text-align:center;pointer-events:none;white-space:nowrap;text-shadow:0 0 20px rgba(255,215,0,0.7);`;
   wrap.appendChild(spellEl);
 
   const instrEl=document.createElement('div');
@@ -2077,7 +2076,7 @@ function showBalloonPop(onDone){
   let globalT=0;
 
   const PCOLS=['#ffb7c5','#ff8fab','#ff69b4','#ff85a1','#f9a8c9'];
-  const LETTER_COLS={'K':'#ff4081','I':'#ff80ab','L':'#ffb3c8','U':'#e91e8c','L2':'#ff69b4'};
+  const LETTER_COLS={'K':'#ffd700','I':'#ffec6e','L':'#ffc200','U':'#ffe066','L2':'#ffda44'};
   const fs=isMob?Math.min(W*0.16,68):Math.min(W*0.10,88);
 
   function updateSpell(){
@@ -2086,39 +2085,12 @@ function showBalloonPop(onDone){
   }
   updateSpell();
 
-  // ── Background ambient petals ──
-  const bgPetals=Array.from({length:18},()=>({
-    x:Math.random()*W, y:Math.random()*H,
-    vy:0.3+Math.random()*0.6, vx:(Math.random()-0.5)*0.3,
-    size:isMob?6+Math.random()*8:8+Math.random()*12,
-    spin:Math.random()*Math.PI*2, spinV:(Math.random()-0.5)*0.014,
-    alpha:0.10+Math.random()*0.18,
-    color:PCOLS[Math.floor(Math.random()*PCOLS.length)]
-  }));
-
-  function drawPetal(cx,cy,size,spin,alpha,color){
-    if(alpha<=0) return;
-    ctx.save(); ctx.globalAlpha=alpha; ctx.translate(cx,cy); ctx.rotate(spin);
-    for(let p=0;p<5;p++){
-      const a=(p/5)*Math.PI*2; ctx.save(); ctx.rotate(a);
-      ctx.beginPath();
-      ctx.moveTo(0,0);
-      ctx.bezierCurveTo(-size*.38,-size*.2,-size*.42,-size*.75,0,-size*.85);
-      ctx.bezierCurveTo(size*.42,-size*.75,size*.38,-size*.2,0,0);
-      const pg=ctx.createLinearGradient(0,0,0,-size*.85);
-      pg.addColorStop(0,'#ffcce0'); pg.addColorStop(0.4,color); pg.addColorStop(1,color);
-      ctx.fillStyle=pg; ctx.shadowColor=color; ctx.shadowBlur=5; ctx.fill(); ctx.restore();
-    }
-    ctx.fillStyle='#ffb3c8'; ctx.shadowColor='#ff80ab'; ctx.shadowBlur=4;
-    ctx.beginPath(); ctx.arc(0,0,size*.1,0,Math.PI*2); ctx.fill(); ctx.restore();
-  }
-
   // ── Spawn a falling letter ──
   function spawnLetter(){
     if(done || nextIdx>=WORD.length) return;
     const ch=WORD[nextIdx];
     const colKey=nextIdx===4?'L2':ch;
-    const color=LETTER_COLS[colKey]||'#ff80ab';
+    const color=LETTER_COLS[colKey]||'#ffd700';
     const tileSize=isMob?Math.min(W*0.18,72):Math.min(W*0.12,96);
     const margin=tileSize/2+10;
     falling.push({
@@ -2153,7 +2125,7 @@ function showBalloonPop(onDone){
     ctx.beginPath();
     ctx.roundRect(-s/2,-s/2,s,s,r);
     const bg=ctx.createRadialGradient(-s*0.15,-s*0.15,0,0,0,s*0.7);
-    bg.addColorStop(0,'rgba(255,220,235,0.18)'); bg.addColorStop(1,'rgba(20,0,12,0.72)');
+    bg.addColorStop(0,'rgba(255,240,180,0.18)'); bg.addColorStop(1,'rgba(12,8,0,0.72)');
     ctx.fillStyle=bg; ctx.fill();
     // Border
     ctx.strokeStyle=l.color; ctx.lineWidth=2.2;
@@ -2209,13 +2181,6 @@ function showBalloonPop(onDone){
     bg.addColorStop(0,'#130008'); bg.addColorStop(1,'#050002');
     ctx.fillStyle=bg; ctx.fillRect(0,0,W,H);
 
-    // Ambient petals
-    bgPetals.forEach(p=>{
-      p.x+=p.vx+Math.sin(p.spin*0.3)*0.25; p.y+=p.vy; p.spin+=p.spinV;
-      if(p.y>H+20){ p.y=-20; p.x=Math.random()*W; }
-      drawPetal(p.x,p.y,p.size,p.spin,p.alpha,p.color);
-    });
-
     // Spawn next letter after gap
     if(!done && nextIdx<WORD.length && spawnTimer>SPAWN_GAP && falling.every(f=>f.caught||f.y>H)){
       spawnTimer=0;
@@ -2252,4 +2217,86 @@ function showBalloonPop(onDone){
       // Danger tint near bottom
       if(l.y>H*0.72){
         const danger=Math.min((l.y-H*0.72)/(H*0.18),1);
-        const pulseA
+        const pulseAlpha=0.10+danger*0.25*Math.abs(Math.sin(globalT*8));
+        ctx.save(); ctx.globalAlpha=pulseAlpha;
+        ctx.fillStyle='#ff0040';
+        ctx.fillRect(0,0,W,H);
+        ctx.restore();
+      }
+
+      drawTile(l);
+    }
+
+    // Sparks
+    for(let i=sparks.length-1;i>=0;i--){
+      const s=sparks[i];
+      s.x+=s.vx; s.y+=s.vy; s.vy+=0.12; s.vx*=0.97;
+      s.alpha-=s.decay;
+      if(s.alpha<=0){ sparks.splice(i,1); continue; }
+      ctx.save(); ctx.globalAlpha=s.alpha; ctx.fillStyle=s.color;
+      ctx.shadowColor=s.color; ctx.shadowBlur=8;
+      ctx.beginPath(); ctx.arc(s.x,s.y,s.r,0,Math.PI*2); ctx.fill(); ctx.restore();
+    }
+
+    // Missed flash
+    for(let i=missed.length-1;i>=0;i--){
+      const m=missed[i];
+      m.alpha-=0.03; m.y-=0.5;
+      if(m.alpha<=0){ missed.splice(i,1); continue; }
+      ctx.save(); ctx.globalAlpha=Math.min(m.alpha,1);
+      ctx.font=`italic 900 ${isMob?32:42}px 'Cormorant Garamond',serif`;
+      ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillStyle='rgba(255,60,60,0.9)'; ctx.shadowColor='#ff0040'; ctx.shadowBlur=14;
+      ctx.fillText('✗ '+m.ch,m.x,m.y);
+      ctx.restore();
+    }
+
+    rafId=requestAnimationFrame(loop);
+  }
+  loop();
+
+  // ── Tap handler ──
+  function handleTap(e){
+    if(done) return;
+    const pts=e.changedTouches?Array.from(e.changedTouches):[{clientX:e.clientX,clientY:e.clientY}];
+    pts.forEach(touch=>{
+      const tx=touch.clientX, ty=touch.clientY;
+      // Must catch in order — only the first un-caught letter is valid
+      const target=falling.find(l=>!l.caught && l.idx===caught.length);
+      if(!target) return;
+      const dx=tx-target.x, dy=ty-target.y;
+      const hitR=target.tileSize*(isMob?1.1:0.9);
+      if(Math.sqrt(dx*dx+dy*dy)<hitR){
+        target.caught=true;
+        caught.push(target.ch);
+        addBurst(target.x,target.y,target.color);
+        updateSpell();
+        // Pulse spell display
+        spellEl.style.textShadow=`0 0 40px rgba(255,215,0,1)`;
+        setTimeout(()=>{ spellEl.style.textShadow=`0 0 20px rgba(255,215,0,0.7)`; },300);
+
+        if(caught.length>=WORD.length){
+          done=true;
+          instrEl.textContent='✨ You spelled her name! ✨';
+          instrEl.style.color='rgba(255,215,0,0.9)';
+          spellEl.style.color='#ffd700';
+          spellEl.style.textShadow='0 0 40px rgba(255,215,0,0.9)';
+          setTimeout(()=>{
+            active=false;
+            cancelAnimationFrame(rafId);
+            window.removeEventListener('resize', resizeBalloonCanvas);
+            wrap.style.transition='opacity 0.9s ease';
+            wrap.style.opacity='0';
+            setTimeout(()=>{ wrap.remove(); onDone(); },950);
+          },1200);
+        }
+      }
+    });
+  }
+  wrap.addEventListener('click',handleTap);
+  wrap.addEventListener('touchstart',e=>{e.preventDefault();handleTap(e);},{passive:false});
+}
+
+</script>
+</body>
+</html>
